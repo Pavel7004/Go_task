@@ -49,21 +49,29 @@ func rangeSumAsync(a uint64, b uint64) uint64 {
 	return sum
 }
 
-func execAndCountRuntime(a uint64, b uint64, f func(uint64, uint64) uint64) (uint64, int64) {
+type testFunc struct {
+	body func(uint64, uint64) uint64
+	args [2]uint64
+}
+
+func countRuntime(function testFunc) (uint64, int64) {
 	t1 := time.Now()
-	ret := f(a, b)
+	ret := function.body(function.args[0], function.args[1])
 	t2 := time.Now()
 	return ret, (t2.Sub(t1)).Nanoseconds()
 }
 
 func main() {
 	fmt.Printf("Enter range: ")
-	var a, b uint64 = 0, 0
-	fmt.Scanf("%d %d", &a, &b)
-	print, nanoSec := execAndCountRuntime(a, b, rangeSum)
+	var function testFunc
+	function.args = [2]uint64{}
+	fmt.Scanf("%d %d", &function.args[0], &function.args[1])
+	function.body = rangeSum
+	print, nanoSec := countRuntime(function)
 	fmt.Println("Normal func")
 	fmt.Println("Result:", print, "... Exec time is", nanoSec, "ns")
-	print, nanoSec = execAndCountRuntime(a, b, rangeSumAsync)
+	function.body = rangeSumAsync
+	print, nanoSec = countRuntime(function)
 	fmt.Println("Async func")
 	fmt.Println("Result:", print, "... Exec time is", nanoSec, "ns")
 }
